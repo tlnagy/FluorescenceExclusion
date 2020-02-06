@@ -4,6 +4,7 @@ using Images
 using ImageFiltering
 using ScatteredInterpolation
 using ImageBinarization
+using ImageSegmentation
 using Statistics
 using Distributions
 using ProgressMeter
