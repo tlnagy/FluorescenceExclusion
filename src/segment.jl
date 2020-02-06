@@ -9,13 +9,15 @@ struct Pillars <: AbstractSegmentable end
 Use a simple algorithm to identify pillars and their centers
 """
 function identify(::Pillars, img::AbstractArray{T, 2}) where {T}
-    M₁ = .~ opening(binarize(Bool, img, ImageBinarization.Balanced()))
+    M₁ = opening(binarize(Bool, img, ImageBinarization.Balanced()))
+
+    dtrans = distance_transform(feature_transform(M₁))
+
+    M₁ .= .~ M₁
 
     # prevent edge pixels from being included in pillars
     M₁[1:1024, [1, 1024], 1] .= 1.0
     M₁[[1, 1024], 1:1024, 1] .= 1.0
-
-    dtrans = distance_transform(feature_transform(M₁))
 
     M₁, dtrans .> 30
 end
