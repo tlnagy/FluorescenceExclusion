@@ -3,5 +3,6 @@
 *.jl.mem
 .ipynb_checkpoints/
 *.ipynb
+*build.log
 Manifest.toml
 docs/build/
