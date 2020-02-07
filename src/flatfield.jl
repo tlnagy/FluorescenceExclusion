@@ -1,3 +1,5 @@
+const BUFFER = 5
+
 """
     compute_flatfield(slice, mask; len) -> flatfield
 
@@ -40,13 +42,25 @@ boundaries.
 function generate_sample_grid(mask::AbstractArray{Bool, 2}; len = 10)
     width, height = size(mask)
     sinusoidal_spacing = sin.(range(-π/2, stop=π/2, length=len))
-    xrange = round.(Int, sinusoidal_spacing .* (width/2 - 5) .+ width/2)
-    yrange = round.(Int, sinusoidal_spacing .* (height/2 - 5) .+ height/2)
+    xrange = round.(Int, sinusoidal_spacing .* (width/2 - BUFFER) .+ width/2)
+    yrange = round.(Int, sinusoidal_spacing .* (height/2 - BUFFER) .+ height/2)
     gridpoints = Set(CartesianIndex(x, y) for x in xrange, y in yrange)
 
     # only select positions on the grid that are also far enough way from objects
     safe_areas = distance_transform(feature_transform(mask)) .> 10
     collect(intersect(gridpoints, Set(findall(safe_areas))))
+end
+
+"""
+    display_grid(arr)
+
+Takes the output of `generate_sample_grid` and creates a simple visualization of
+the sample points
+"""
+function display_grid(arr::AbstractArray{CartesianIndex{2}})
+    eval_points = falses((maximum(arr) + CartesianIndex(BUFFER, BUFFER)).I)
+    eval_points[arr] .= true
+    Gray.(distance_transform(feature_transform(eval_points)) .< 5)
 end
 
 
