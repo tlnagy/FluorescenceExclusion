@@ -9,6 +9,14 @@ notifications:
   email:
     - github@tamasnagy.com
 
+# needed to get PyCall working
+addons:
+  apt:
+    packages:
+      - python-numpy
+      - python3-numpy
+      - python3.4-venv
+
 matrix:
  allow_failures:
  - julia: nightly
