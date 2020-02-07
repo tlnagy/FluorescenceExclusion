@@ -13,9 +13,7 @@ notifications:
 addons:
   apt:
     packages:
-      - python-numpy
       - python3-numpy
-      - python-pip
       - python3-pip
 
 matrix:
@@ -23,6 +21,7 @@ matrix:
  - julia: nightly
 
 before_script:
+  - pip3 install --user --upgrade pip
   - julia -e 'using Pkg; Pkg.develop(PackageSpec(url="https://github.com/tlnagy/SegmentationTools.jl"))'
 
 after_success:
