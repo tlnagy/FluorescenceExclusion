@@ -48,3 +48,29 @@ function generate_sample_grid(mask::AbstractArray{Bool, 2}; len = 10)
     safe_areas = distance_transform(feature_transform(mask)) .> 10
     collect(intersect(gridpoints, Set(findall(safe_areas))))
 end
+
+
+function get_medians(img::AbstractArray{T, 2}, centers::AbstractArray{Bool, 2}) where {T}
+    pillar_medians = Dict{Int, Float64}()
+    pillar_labels = label_components(copy(centers))
+
+    for i in unique(pillar_labels)
+        (i == 0) && continue # ignore the background
+        val = Float64(median(view(img, pillar_labels .== i)))
+        pillar_medians[i] = val
+    end
+    pillar_medians
+end
+
+
+function get_medians(img::AbstractArray{T, 3}, centers::AbstractArray{Bool, 3}) where {T}
+    pillar_medians = DefaultDict{Int, Vector{Float64}}(Vector{Float64})
+
+    @showprogress for t in 1:size(img, 3)
+        medians = get_medians(view(img, :, :, 1), view(centers, :, :, 1))
+        for (k, v) in medians
+            push!(pillar_medians[k], v)
+        end
+    end
+    pillar_medians
+end

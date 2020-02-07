@@ -78,3 +78,27 @@ function identify(::Cells,
     end
     masks
 end
+
+function remove_small!(mask::AbstractArray{Bool, 2}, labels::AbstractArray{Int, 2}; lim=100) where {T}
+    for label in findall(component_lengths(labels) .< lim) .- 1
+        mask[labels .== label] .= false
+    end
+end
+
+function remove_small!(mask::AbstractArray{Bool, 2}; lim=100) where {T}
+    # TODO: we shouldn't copy here but it needs to wait till
+    # https://github.com/JuliaImages/ImageMorphology.jl/issues/21 is resolved
+    labels = label_components(copy(mask))
+    remove_small!(mask, labels; lim=lim)
+end
+
+function segment!(img::AbstractArray{T, 2}, label::AbstractArray{Int, 2}) where {T}
+    seeds = label
+    bkg = label .== 0
+    # seeds will be computed by eroding 8 pixels in from the background to get
+    # an idea of where the cells are 
+    seeds[distance_transform(feature_transform(bkg)) .<= 8] .= 0
+
+    segments = ImageSegmentation.watershed(img, seeds; mask=.~ bkg, compactness=0.01)
+    label .= labels_map(segments)
+end
