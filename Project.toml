@@ -4,15 +4,23 @@ authors = ["Tamas Nagy <github@tamasnagy.com>"]
 version = "0.1.0"
 
 [deps]
+AxisArrays = "39de3d68-74b9-583c-8d2d-e117c070f3a9"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 ImageBinarization = "cbc4b850-ae4b-5111-9e64-df94c024a13d"
 ImageFiltering = "6a3955dd-da59-5b1f-98d4-e7296123deb5"
 ImageSegmentation = "80713f31-8817-5129-9cf8-209ff8fb23e1"
 Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
+Pandas = "eadc2687-ae89-51f9-a5d9-86b5a6373a9c"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
+PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
+Query = "1a8c2f83-1ff3-5112-b086-8aa67b057ba1"
 ScatteredInterpolation = "3f865c0f-6dca-5f4d-999b-29fe1e7e3c92"
+SegmentationTools = "169f94bb-3e90-5bdf-856c-883fe665edaa"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+Suppressor = "fd094767-a336-5f1f-9728-57cf17d0bbfb"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
 DataStructures = "0.17"

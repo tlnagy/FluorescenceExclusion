@@ -14,7 +14,8 @@ include("flatfield.jl")
 include("denoise.jl")
 include("segment.jl")
 include("correct.jl")
+include("tracking.jl")
 
-export identify, segment!, correct!, denoise, compute_flatfield
+export identify, segment!, correct!, link, denoise, compute_flatfield
 
 end # module
