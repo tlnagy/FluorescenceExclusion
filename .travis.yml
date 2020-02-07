@@ -15,7 +15,6 @@ addons:
     packages:
       - python-numpy
       - python3-numpy
-      - python3.4-venv
 
 matrix:
  allow_failures:
