@@ -2,6 +2,7 @@ function correct!(img::AbstractArray{T, 3}) where {T}
     flatfield = similar(view(img, :, :, 1))
     labels = Array{Int}(undef, size(img))
     n_pillars = 0
+    prev_max::Int = 0
 
     @showprogress for t in 1:size(img, 3)
         slice = view(img, :, :, t)
@@ -26,6 +27,9 @@ function correct!(img::AbstractArray{T, 3}) where {T}
         segment!(slice, labeled)
 
         slice .= imadjustintensity(slice ./ (flatfield .* mean(values(pillar_medians))))
+
+        labeled[labeled .> 0] .+= prev_max
+        prev_max = maximum(labeled)
         labels[:, :, t] .= labeled
     end
 
