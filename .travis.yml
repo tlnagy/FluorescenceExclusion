@@ -21,7 +21,7 @@ matrix:
  - julia: nightly
 
 before_script:
-  - pip3 install --user --upgrade pip
+  - pip3 install --upgrade pip
   - julia -e 'using Pkg; Pkg.develop(PackageSpec(url="https://github.com/tlnagy/SegmentationTools.jl"))'
 
 after_success:
