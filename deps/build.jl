@@ -1,3 +1,9 @@
+using Pkg
+
+ENV["PYTHON"] = ""
+
+Pkg.build("PyCall")
+
 using PyCall
 
 # install trackpy and pandas
