@@ -63,7 +63,13 @@ function display_grid(arr::AbstractArray{CartesianIndex{2}})
     Gray.(distance_transform(feature_transform(eval_points)) .< 5)
 end
 
+"""
+    get_medians(img, centers)
 
+Gets the median intensity value for each pillar center defined by the boolean
+mask `centers` using the data in `img`. This can be used to determine the true
+"floor" in the intensity signal, which may drift over the course of an experiment.
+"""
 function get_medians(img::AbstractArray{T, 2}, centers::AbstractArray{Bool, 2}) where {T}
     pillar_medians = Dict{Int, Float64}()
     pillar_labels = label_components(copy(centers))
@@ -77,11 +83,13 @@ function get_medians(img::AbstractArray{T, 2}, centers::AbstractArray{Bool, 2}) 
 end
 
 
-function get_medians(img::AbstractArray{T, 3}, centers::AbstractArray{Bool, 3}) where {T}
+function get_medians(img::AbstractArray{T, 3}, centers::AbstractArray{Bool, 3}; verbose=true) where {T}
     pillar_medians = DefaultDict{Int, Vector{Float64}}(Vector{Float64})
 
-    @showprogress for t in 1:size(img, 3)
-        medians = get_medians(view(img, :, :, 1), view(centers, :, :, 1))
+    wait_time = verbose ? 1 : Inf
+
+    @showprogress wait_time for t in 1:size(img, 3)
+        medians = get_medians(view(img, :, :, t), view(centers, :, :, t))
         for (k, v) in medians
             push!(pillar_medians[k], v)
         end

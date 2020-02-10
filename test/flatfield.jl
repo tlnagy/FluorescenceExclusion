@@ -27,3 +27,25 @@ using Distributions
     @test all(isapprox.(flatfield[256:768, 256:768], img[256:768, 256:768], atol=0.006))
 
 end
+
+@testset "Temporal drift correction" begin
+    img = zeros(10,10,3)
+    img[2,2,1] = 2.0
+    img[4,4,1] = 2.5
+    img[6:9, 6, 1:3] .= [3.0, 4.0, 8.0, 9.0]
+    centers = img .> 0.0
+
+    vals = FluorescenceExclusion.get_medians(img, centers; verbose=false)
+
+    @test vals[1] == [2.0, 6.0, 6.0]
+    @test vals[2] == [2.5]
+    @test vals[3] == [6.0]
+
+    centers = repeat(img[:, :, 1] .> 0, 1, 1, 3)
+
+    vals = FluorescenceExclusion.get_medians(img, centers; verbose=false)
+
+    @test vals[1] == [2.0, 0.0, 0.0]
+    @test vals[2] == [2.5, 0.0, 0.0]
+    @test vals[3] == [6.0, 6.0, 6.0]
+end
