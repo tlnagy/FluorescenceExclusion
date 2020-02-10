@@ -9,19 +9,11 @@ notifications:
   email:
     - github@tamasnagy.com
 
-# needed to get PyCall working
-addons:
-  apt:
-    packages:
-      - python3-numpy
-      - python3-pip
-
 matrix:
  allow_failures:
  - julia: nightly
 
 before_script:
-  - pip3 install --upgrade pip
   - julia -e 'using Pkg; Pkg.develop(PackageSpec(url="https://github.com/tlnagy/SegmentationTools.jl"))'
 
 after_success:
