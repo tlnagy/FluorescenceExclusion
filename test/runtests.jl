@@ -3,3 +3,4 @@ using Images
 using FluorescenceExclusion
 
 include("flatfield.jl")
+include("segment.jl")

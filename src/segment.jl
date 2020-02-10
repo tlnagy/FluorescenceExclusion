@@ -4,28 +4,36 @@ abstract type AbstractSegmentable end
 struct Pillars <: AbstractSegmentable end
 
 """
-    identify(Pillars(), img)
+    identify(Pillars(), img; dist)
 
-Use a simple algorithm to identify pillars and their centers
+Use a simple algorithm to identify pillars and their centers. The optional
+keyword `dist` allows varying the number of pixels from the edge of the
+pillar that a pixel must be to be considered a center pixel. This helps correct
+for incomplete sealing at the edges of pillars.
 """
-function identify(::Pillars, img::AbstractArray{T, 2}) where {T}
+function identify(::Pillars, img::AbstractArray{T, 2}; dist=30) where {T}
     M₁ = opening(binarize(Bool, img, ImageBinarization.Balanced()))
+
+    h, w = size(img)
+
+    # prevent edge pixels from being included in pillars
+    M₁[1:h, [1, w]] .= true
+    M₁[[1, h], 1:w] .= true
 
     dtrans = distance_transform(feature_transform(M₁))
 
     M₁ .= .~ M₁
 
-    # prevent edge pixels from being included in pillars
-    M₁[1:1024, [1, 1024], 1] .= 1.0
-    M₁[[1, 1024], 1:1024, 1] .= 1.0
-
-    M₁, dtrans .> 30
+    M₁, dtrans .> dist
 end
 
-function identify(::Pillars, img::AbstractArray{T, 3}) where {T}
+function identify(::Pillars, img::AbstractArray{T, 3}; dist=30, verbose=true) where {T}
     pillar_masks = Array{Bool}(undef, size(img))
     pillar_centers = Array{Bool}(undef, size(img))
-    @showprogress for t in 1:size(img, 3)
+
+    wait_time = verbose ? 1 : Inf
+
+    @showprogress wait_time for t in 1:size(img, 3)
         I = @view img[:, :, t]
         out = identify(Pillars(), I)
 
