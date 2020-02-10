@@ -13,6 +13,9 @@ matrix:
  allow_failures:
  - julia: nightly
 
+before_script:
+  - julia -e 'using Pkg; Pkg.develop(PackageSpec(url="https://github.com/tlnagy/SegmentationTools.jl"))'
+
 after_success:
   # push coverage results to Codecov
   - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
