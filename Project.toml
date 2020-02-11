@@ -23,6 +23,7 @@ Suppressor = "fd094767-a336-5f1f-9728-57cf17d0bbfb"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
+DataFrames = "0.20"
 DataStructures = "0.17"
 Distributions = "0.22"
 ImageBinarization = "0.2"
