@@ -6,7 +6,7 @@ function correct!(img::AbstractArray{T, 3}) where {T}
 
     @showprogress for t in 1:size(img, 3)
         slice = view(img, :, :, t)
-        
+
         pillar_mask, pillar_centers = identify(Pillars(), slice)
         cell_mask = identify(Cells(), slice, pillar_mask)
 
@@ -23,10 +23,11 @@ function correct!(img::AbstractArray{T, 3}) where {T}
         labeled = label_components(cell_mask)
 
         remove_small!(cell_mask, labeled)
-        
+
         segment!(slice, labeled)
 
-        slice .= imadjustintensity(slice ./ (flatfield .* mean(values(pillar_medians))))
+        bkg = mean(values(pillar_medians))
+        slice .= imadjustintensity((slice .- bkg) ./ (flatfield .- bkg))
 
         labeled[labeled .> 0] .+= prev_max
         prev_max = maximum(labeled)
