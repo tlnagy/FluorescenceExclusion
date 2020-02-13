@@ -4,30 +4,39 @@ abstract type AbstractSegmentable end
 struct Pillars <: AbstractSegmentable end
 
 """
-    identify(Pillars(), img; dist)
+    identify(Pillars(), img; dist, min_area)
 
 Use a simple algorithm to identify pillars and their centers. The optional
 keyword `dist` allows varying the number of pixels from the edge of the
 pillar that a pixel must be to be considered a center pixel. This helps correct
-for incomplete sealing at the edges of pillars.
+for incomplete sealing at the edges of pillars. Additionally, the parameter
+`min_area` is the minimum pixel area that an object should have to be considered
+a pillar.
 """
-function identify(::Pillars, img::AbstractArray{T, 2}; dist=30) where {T}
-    M₁ = opening(binarize(Bool, img, ImageBinarization.Balanced()))
+function identify(::Pillars, img::AbstractArray{T, 2}; dist=30, min_area=3000) where {T}
+    # this labels the foreground, i.e. not pillars, so we'll need to invert it
+    # later
+    M₁ = opening(binarize(Bool, img, ImageBinarization.AdaptiveThreshold(img)))
+    M₁ .= .~ M₁
 
     h, w = size(img)
 
     # prevent edge pixels from being included in pillars
-    M₁[1:h, [1, w]] .= true
-    M₁[[1, h], 1:w] .= true
+    M₁[1:h, [1, w]] .= false
+    M₁[[1, h], 1:w] .= false
 
-    dtrans = distance_transform(feature_transform(M₁))
+    comps = label_components(M₁)
+    small_objects = component_lengths(comps) .< min_area
+    for o in component_indices(comps)[small_objects]
+        M₁[o] .= false
+    end
 
-    M₁ .= .~ M₁
+    dtrans = distance_transform(feature_transform(.~ M₁))
 
     M₁, dtrans .> dist
 end
 
-function identify(::Pillars, img::AbstractArray{T, 3}; dist=30, verbose=true) where {T}
+function identify(::Pillars, img::AbstractArray{T, 3}; dist=30, min_area=3000, verbose=true) where {T}
     pillar_masks = Array{Bool}(undef, size(img))
     pillar_centers = Array{Bool}(undef, size(img))
 
@@ -35,7 +44,7 @@ function identify(::Pillars, img::AbstractArray{T, 3}; dist=30, verbose=true) wh
 
     @showprogress wait_time for t in 1:size(img, 3)
         I = @view img[:, :, t]
-        out = identify(Pillars(), I)
+        out = identify(Pillars(), I, dist=dist, min_area=min_area)
 
         pillar_masks[:, :, t] .= out[1]
         pillar_centers[:, :, t] .= out[2]
