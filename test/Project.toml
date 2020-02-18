@@ -1,4 +1,9 @@
 [deps]
+AxisArrays = "39de3d68-74b9-583c-8d2d-e117c070f3a9"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+FixedPointNumbers = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
+ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1"
 Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
