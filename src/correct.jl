@@ -11,9 +11,10 @@ function correct!(img::AbstractArray{T, 3}) where {T}
         cell_mask = identify(Cells(), slice, pillar_mask)
 
         pillar_medians = get_medians(slice, pillar_centers)
-        
+
+        flatfield .= compute_flatfield(slice, cell_mask .| pillar_mask, len=20);
+
         if t == 1
-            flatfield .= compute_flatfield(slice, cell_mask .| pillar_mask, len=10);
             n_pillars = length(keys(pillar_medians))
             @info "Found $n_pillars pillars"
         elseif length(keys(pillar_medians)) != n_pillars
