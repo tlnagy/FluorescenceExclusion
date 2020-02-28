@@ -1,3 +1,5 @@
+using StatsBase
+
 function correct!(img::AbstractArray{T, 3}) where {T}
     flatfield = similar(view(img, :, :, 1))
     labels = Array{Int}(undef, size(img))
@@ -18,7 +20,8 @@ function correct!(img::AbstractArray{T, 3}) where {T}
 
         segment!(slice, labeled)
 
-        slice .= imadjustintensity(slice ./ flatfield)
+        slice .= (slice ./ flatfield)
+        slice ./= percentile(vec(slice), 99.9)
 
         pillar_medians = get_medians(slice, pillar_centers)
         bkg = mean(values(pillar_medians))
