@@ -1,16 +1,17 @@
 using StatsBase
 
-function correct!(img::AbstractArray{T, 3}) where {T}
-    flatfield = similar(view(img, :, :, 1))
-    labels = Array{Int}(undef, size(img))
+function correct!(data::AbstractArray{<: Colorant, 3}, dn_img::AbstractArray{<: Colorant, 3})
+    flatfield = similar(view(data, :, :, 1))
+    labels = Array{Int}(undef, size(dn_img))
     n_pillars = 0
     prev_max::Int = 0
 
-    @showprogress for t in 1:size(img, 3)
-        slice = view(img, :, :, t)
+    @showprogress for t in 1:size(dn_img, 3)
+        slice = view(data, :, :, t)
+        dn_slice = view(dn_img, :, :, t)
 
-        pillar_mask, pillar_centers = identify(Pillars(), slice)
-        cell_mask = identify(Cells(), slice, pillar_mask)
+        pillar_mask, pillar_centers = identify(Pillars(), dn_slice)
+        cell_mask = identify(Cells(), dn_slice, pillar_mask)
 
         flatfield .= compute_flatfield(slice, cell_mask .| pillar_mask, len=20);
 
