@@ -1,4 +1,5 @@
 const BUFFER = 5
+const region = CartesianIndices((-4:4, -4:4))
 
 """
     compute_flatfield(slice, mask; len) -> flatfield
@@ -15,7 +16,11 @@ function compute_flatfield(slice::AbstractArray{T, 2}, mask::AbstractArray{Bool,
 
     points = generate_sample_grid(mask; len=len)
 
-    values = vec(Float64.(slice[points]))
+    values = zeros(Base.axes(points))
+    # get the median over a small region around the point for a more stable value
+    for i in eachindex(points)
+        values[i] = Float64.(median(slice[points[i] .+ region]))
+    end
     spoints = hcat([[pos[1], pos[2]] for pos in points]...)
 
     itp = ScatteredInterpolation.interpolate(Multiquadratic(), spoints, values);
