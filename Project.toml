@@ -25,7 +25,7 @@ Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
 AxisArrays = "0.4"
-DataFrames = "0.20"
+DataFrames = "0.20, 0.21"
 DataStructures = "0.17"
 Distributions = "0.22, 0.23"
 ImageBinarization = "0.2"
