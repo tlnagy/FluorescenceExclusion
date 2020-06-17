@@ -9,16 +9,13 @@ notifications:
   email:
     - github@tamasnagy.com
 
-before_script:
-  - julia -e 'using Pkg; Pkg.develop(PackageSpec(url="https://github.com/tlnagy/SegmentationTools.jl"))'
-
 after_success:
   # push coverage results to Codecov
   - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
 
 jobs:
   allow_failures:
-   - julia: nightly
+    - julia: nightly
   include:
     - stage: "Documentation"
       julia: 1
@@ -32,7 +29,6 @@ jobs:
         - pip3 install --user --upgrade pip
         - pip --version
         - pip install --user pandas
-        - julia -e 'using Pkg; Pkg.develop(PackageSpec(url="https://github.com/tlnagy/SegmentationTools.jl"))'
       script:
         - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd()));
                                                Pkg.instantiate()'

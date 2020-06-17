@@ -1,14 +1,12 @@
-using SegmentationTools
 using Suppressor
 using DataFrames
 using Unitful: μm, ustrip
 using AxisArrays
-using Query
 using PyCall
-import Pandas
+using Pandas
 
 function link(img, labels; dist=(3, 12), chamber_height=12.96μm)
-    particle_df = SegmentationTools.build_tp_df(img, labels, dist=dist);
+    particle_df = build_tp_df(img, labels, dist=dist);
 
     tp = pyimport("trackpy")
 
