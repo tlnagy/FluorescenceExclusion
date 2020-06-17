@@ -37,7 +37,7 @@ function compute_flatfield(slice::AbstractArray{T, 2}, mask::AbstractArray{Bool,
 end
 
 """
-    generate_sample_grid(mask)
+    generate_sample_grid(mask; len)
 
 Create a sinusoidally spaced grid that avoiding areas labeled true in `mask`.
 The higher density of sampling points near the edges helps with the increased

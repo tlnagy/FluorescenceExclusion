@@ -60,7 +60,7 @@ struct Cells <: AbstractSegmentable end
 Identify cells in the FxM channel using a custom edge-based detection system that
 thresholds using the distribution of spatial gradient sizes across cells.
 """
-function identify(::Cells, 
+function identify(::Cells,
                  img::AbstractArray{T, 2},
                  pillar_masks::AbstractArray{Bool, 2}) where {T}
 
@@ -69,7 +69,7 @@ function identify(::Cells,
 
     # remove the pillars and their vicinities from the calculations since they
     # can skew the results
-    foreground = distance_transform(feature_transform((pillar_masks))) .> 30 
+    foreground = distance_transform(feature_transform((pillar_masks))) .> 30
     mag .*= foreground
 
     flattened = filter(x->x > 0.0, reshape(mag, :))
@@ -80,12 +80,12 @@ function identify(::Cells,
     # suggests that this approach catches the thin edges of cells much better
     # than common algorithms like Otsu or Yen.
     normfit = fit_mle(LogNormal, view(flattened, lo .< flattened .< hi))
-    
+
     thres = opening(.~imfill(mag .< exp(normfit.μ + 1*normfit.σ), (0, 500)))
     imfill(thres, (0, 50))
 end
 
-function identify(::Cells, 
+function identify(::Cells,
                  img::AbstractArray{T, 3},
                  pillar_masks::AbstractArray{Bool, 3}) where {T}
 
@@ -191,9 +191,9 @@ end
 function segment!(img::AbstractArray{T, 2}, label::AbstractArray{Int, 2}) where {T}
     seeds = label
     bkg = label .== 0
-    # seeds will be computed by eroding 8 pixels in from the background to get
-    # an idea of where the cells are 
-    seeds[distance_transform(feature_transform(bkg)) .<= 8] .= 0
+    # seeds will be computed by eroding 1 pixels in from the background to get
+    # an idea of where the cells are
+    seeds[distance_transform(feature_transform(bkg)) .<= 1] .= 0
 
     segments = ImageSegmentation.watershed(img, seeds; mask=.~ bkg, compactness=0.01)
     label .= labels_map(segments)
