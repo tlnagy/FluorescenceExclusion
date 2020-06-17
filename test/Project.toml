@@ -1,4 +1,8 @@
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+ImageContrastAdjustment = "f332f351-ec65-5f6a-b3d1-319c6670881a"
+ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1"
+ImageMorphology = "787d08f9-d448-5407-9aad-5290dd7ab264"
 Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

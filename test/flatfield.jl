@@ -1,10 +1,12 @@
 using Distributions
+using ImageContrastAdjustment
+using ImageMorphology
 
 @testset "Flatfield Correction" begin
 
     # lets create an off-center non-flat light source
     norm = pdf.(Normal(512, 512), 1:1024)
-    img = imadjustintensity(norm * norm')
+    img = adjust_histogram(norm * norm', LinearStretching(nothing => (0,1)))
 
     ranges = (x,y) -> (x-50:x+50, y-50:y+50)
 
