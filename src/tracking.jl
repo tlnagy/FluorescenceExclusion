@@ -1,22 +1,24 @@
-using SegmentationTools
 using Suppressor
-using DataFrames
+using DataFrames 
 using Unitful: μm, ustrip
 using AxisArrays
-using Query
 using PyCall
-import Pandas
+using Pandas
 
 function link(img, labels; dist=(3, 12), chamber_height=12.96μm)
-    particle_df = SegmentationTools.build_tp_df(img, labels, dist=dist);
+    particle_df = build_tp_df(img, labels, dist=dist);
+
+    to_track = particle_df[!, [:frame, :id, :x, :y]]
+
+    select!(particle_df, Not([:x, :y]))
 
     tp = pyimport("trackpy")
 
     # convert particles to a Pandas DataFrame and call trackpy
 
     @info "Linking..."
-    t = @suppress_out tp.link_df(Pandas.DataFrame(particle_df), 25, memory=2);
-    linked = DataFrame(Pandas.DataFrame(t));
+    t = @suppress_out tp.link_df(Pandas.DataFrame(to_track), 25, memory=2);
+    linked = join(DataFrames.DataFrame(Pandas.DataFrame(t)), particle_df, on=[:frame, :id])
 
     xstepsize = step(AxisArrays.axes(img, Axis{:x}).val)
     ystepsize = step(AxisArrays.axes(img, Axis{:y}).val)
@@ -24,13 +26,15 @@ function link(img, labels; dist=(3, 12), chamber_height=12.96μm)
     # compute the maximum intensity value for each cell's background
     Imax = linked[:, :medbkg_slice]
 
-    linked[!, :rel_volumes] = (linked[!, :medbkg_slice] .* linked[!, :area]) .- linked[!, :tf_slice];
+    rel_vols = (linked[!, :medbkg_slice] .* linked[!, :area]) .- linked[!, :tf_slice];
+    insertcols!(linked, 6, :rel_volume => rel_vols)
 
     # α is the maximum signal per voxel
     α = (Imax .- 0.0) ./ (chamber_height .* xstepsize .* ystepsize)
 
     # equation 2 from Cadart 2017
-    linked[!, :abs_volumes] .= linked[!, :rel_volumes] ./ α
+    abs_vols = linked[!, :rel_volume] ./ α
+    insertcols!(linked, 7, :abs_volume => abs_vols)
 
     linked[!, :area] = linked[!, :area] .* xstepsize .* ystepsize
 
