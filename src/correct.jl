@@ -7,9 +7,8 @@ function correct!(data::AbstractArray{<: Colorant, 3}, dn_img::AbstractArray{<: 
         slice = view(data, :, :, t)
         dn_slice = view(dn_img, :, :, t)
 
-        labeled = correct!(slice, dn_slice)
+        labels[:, :, t] = correct!(slice, dn_slice)
     end
-    fix_labels(labels)
     labels
 end
 
@@ -21,8 +20,9 @@ function correct!(data::AbstractArray{<: Colorant, 2}, dn_img::AbstractArray{<: 
 
     labeled = label_components(cell_mask)
 
+
     # remove_small!(cell_mask, labeled)
-    segment!(data, labeled)
+    # segment!(data, labeled)
 
     data .= (data ./ flatfield)
     data ./= percentile(vec(data), 99.9)
