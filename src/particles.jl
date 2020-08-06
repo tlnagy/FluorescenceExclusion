@@ -76,7 +76,7 @@ end
 function build_tp_df(img::AxisArray{T1, 3},
                      thresholds::AxisArray{T2, 3}; dist=(2, 10)) where {T1, T2 <: Bool}
     build_tp_df(AxisArray(reshape(img, size(img)..., 1),
-                          AxisArrays.axes(img)..., Axis{:channel}([:slice])),
+                          AxisArrays.axes(img)..., Axis{:channel}([:FxM])),
                 thresholds;
                 dist=dist
                )
@@ -95,7 +95,7 @@ function build_tp_df(img::AxisArray{T1, 3},
                      thresholds::AxisArray{T2, 3}; dist=(2, 10)) where {T1, T2 <: Integer}
 
     build_tp_df(AxisArray(reshape(img, size(img)..., 1),
-                          AxisArrays.axes(img)..., Axis{:channel}([:slice])),
+                          AxisArrays.axes(img)..., Axis{:channel}([:FxM])),
                 thresholds;
                 dist=dist
                )
