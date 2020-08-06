@@ -13,6 +13,12 @@ after_success:
   # push coverage results to Codecov
   - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
 
+# only build the master branch since all other branches will have PRs associated
+# with them. See https://github.com/travis-ci/travis-ci/issues/1147#issuecomment-160820262
+branches:
+  only:
+    - "master"
+
 jobs:
   allow_failures:
     - julia: nightly
