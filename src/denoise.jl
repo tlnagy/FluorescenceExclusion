@@ -24,10 +24,15 @@ function denoise(filepath; cores=Sys.CPU_THREADS)
     # denoise image using NDSAFIR
     dn_mrc = replace(mrc_filepath, ".mrc" => "_dn.mrc")
     @info "Denoising $filename)"
-    cmd = `ndsafir_priism "$mrc_filepath" "$dn_mrc" -iter=4 -np=$cores -3d=t -noise=poisson -adapt=10.0 -island=4.0 -p=1 -sampling=-1`
+    cmd = `ndsafir_priism "$mrc_filepath" "$dn_mrc" -iter=4 -np=$cores -3d=t -noise=poisson -usetmp -adapt=10.0 -island=4.0 -p=1 -sampling=-1`
     run(pipeline(cmd, stdout=outfile, stderr=outfile, append=true))
 
     dn_tiff = replace(dn_mrc, "_dn.mrc" => "_dn.tiff")
     @info "Converting $filename back to tif"
     run(`mrc2tiff "$dn_mrc" -single -out="$dn_tiff"`)
+
+    @info "Cleaning up..."
+    rm(mrc_filepath)
+    rm(dn_mrc)
+    rm(outfile)
 end
