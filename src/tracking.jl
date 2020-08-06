@@ -24,9 +24,9 @@ function link(img, labels; dist=(3, 12), chamber_height=12.96μm)
     ystepsize = step(AxisArrays.axes(img, Axis{:y}).val)
 
     # compute the maximum intensity value for each cell's background
-    Imax = linked[:, :medbkg_slice]
+    Imax = linked[:, :medbkg_FxM]
 
-    rel_vols = (linked[!, :medbkg_slice] .* linked[!, :area]) .- linked[!, :tf_slice];
+    rel_vols = (linked[!, :medbkg_FxM] .* linked[!, :area]) .- linked[!, :tf_FxM];
     insertcols!(linked, 6, :rel_volume => rel_vols)
 
     # α is the maximum signal per voxel
