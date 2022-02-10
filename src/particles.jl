@@ -14,7 +14,7 @@ function build_tp_df(img::AxisArray{T1, 4},
 
     particles = DataFrames.DataFrame[]
 
-    for (idx, timepoint) in enumerate(timeaxis(img))
+    @showprogress for (idx, timepoint) in enumerate(timeaxis(img))
         component_slice = view(components, :, :, idx)
 
         # get all ids present in the current slice
@@ -63,7 +63,12 @@ function build_tp_df(img::AxisArray{T1, 4},
                 # median background is the median of background signal in the
                 # locality of object
                 bkg = Float64.(channelslice[indices])
-                push!(medbkgs, median(bkg) ± (1.253 * std(bkg) / sqrt(length(bkg))))
+                if length(bkg) == 0
+                    push!(medbkgs, NaN)
+                    @warn "Locality missing for id $id in frame $idx"
+                else
+                    push!(medbkgs, median(bkg) ± (1.253 * std(bkg) / sqrt(length(bkg))))
+                end
             end
             data[Symbol("tf_", c)] = tfs
             data[Symbol("medbkg_", c)] = medbkgs
