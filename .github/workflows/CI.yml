@@ -19,6 +19,7 @@ jobs:
           - '1.3'
           - '1'
           - 'nightly'
+        python-version: ['3']
         os:
           - ubuntu-latest
         arch:
@@ -50,6 +51,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Setup python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: ${{ matrix.arch }}
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install pandas
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1'
@@ -58,6 +66,8 @@ jobs:
             using Pkg
             Pkg.develop(PackageSpec(path=pwd()))
             Pkg.instantiate()'
+        env:
+          PYTHON: python
       - run: julia --project=docs docs/make.jl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
