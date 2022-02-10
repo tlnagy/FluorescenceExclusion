@@ -28,19 +28,7 @@ function correct!(data::AbstractArray{<: Colorant, 2}, dn_img::AbstractArray{<: 
 
     labeled = label_components(cell_mask)
 
-
-    # remove_small!(cell_mask, labeled)
-    # segment!(data, labeled)
-
-    data .= (data ./ flatfield)
-    data ./= percentile(vec(data), 99.9)
-
-    pillar_medians = get_medians(data, pillar_centers)
-    bkg = mean(values(pillar_medians))
-
-    # subtract the background and clamp values so that the median background
-    # value is now 0
-    data .= clamp01.(data .- bkg)
+    data .= ((data .- bkg) ./ flatfield)
 
     labeled
 end
