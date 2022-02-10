@@ -2,7 +2,7 @@
 
 | **Documentation**                 | **Build Status**                                              |
 |:----------------------------------|:--------------------------------------------------------------|
-| [![][docs-dev-img]][docs-dev-url] | [![][status-img]][status-url] [![][travis-img]][travis-url] [![][codecov-img]][codecov-url] |
+| [![][docs-dev-img]][docs-dev-url] | [![][status-img]][status-url] [![][ci-img]][ci-url] [![][codecov-img]][codecov-url] |
 
 Fluorescence Exclusion Microscopy is a quantitative imaging method for measuring
 cell volume that relies on the exclusion of a dye by cells in chambers with a
@@ -27,8 +27,8 @@ following command in the Julia REPL:
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
 [docs-dev-url]: https://tamasnagy.com/FluorescenceExclusion.jl/dev
 
-[travis-img]: https://travis-ci.com/tlnagy/FluorescenceExclusion.jl.svg?branch=master
-[travis-url]: https://travis-ci.com/tlnagy/FluorescenceExclusion.jl
+[ci-img]: https://github.com/tlnagy/FluorescenceExclusion.jl/workflows/CI/badge.svg
+[ci-url]: https://github.com/tlnagy/FluorescenceExclusion.jl/actions
 
 [codecov-img]: https://codecov.io/gh/tlnagy/FluorescenceExclusion.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/tlnagy/FluorescenceExclusion.jl
