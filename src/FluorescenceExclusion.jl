@@ -3,12 +3,8 @@ module FluorescenceExclusion
 using ColorTypes
 using DataStructures
 using Distributions
-using ImageAxes
+using Images
 using ImageBinarization
-using ImageCore
-using ImageFiltering
-using ImageMorphology
-using ImageSegmentation
 using Measurements
 using OffsetArrays
 using ProgressMeter
