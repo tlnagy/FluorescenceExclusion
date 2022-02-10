@@ -1,4 +1,3 @@
-using Suppressor
 using DataFrames 
 using Unitful: μm, ustrip
 using AxisArrays
@@ -17,7 +16,8 @@ function link(img, labels; dist=(3, 12), chamber_height=12.96μm)
     # convert particles to a Pandas DataFrame and call trackpy
 
     @info "Linking..."
-    t = @suppress_out tp.link_df(Pandas.DataFrame(to_track), 25, memory=2);
+    tp.quiet(true)
+    t = tp.link_df(Pandas.DataFrame(to_track), 25, memory=2);
     linked = join(DataFrames.DataFrame(Pandas.DataFrame(t)), particle_df, on=[:frame, :id])
 
     xstepsize = step(AxisArrays.axes(img, Axis{:x}).val)
