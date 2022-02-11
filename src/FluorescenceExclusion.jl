@@ -18,6 +18,6 @@ include("correct.jl")
 include("particles.jl")
 include("tracking.jl")
 
-export identify, segment!, correct!, link, denoise, compute_flatfield
+export identify, segment!, correct!, link, denoise, compute_flatfield, build_tp_df
 
 end # module

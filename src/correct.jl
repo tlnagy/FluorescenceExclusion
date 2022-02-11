@@ -14,7 +14,31 @@ function correct!(data::AbstractArray{<: Colorant, 3}; mask = nothing)
     labels
 end
 
-function correct!(data::A; mask=zeros(Bool, size(data)...)) where {A <: AbstractMatrix{<: AbstractGray{<: AbstractFloat}}}
+"""
+    correct!(data; mask)
+
+Given a FxM image `data`, corrects for inhomogeneities both in illumination and
+in warping. 
+
+It does this by sampling the foreground signal of the excluded dye
+and then interpolating into the "holes" in the signal like the pillars and
+cells. Passing an additional optional parameter `mask` can augment the
+built-in detection of cells to avoid using those areas to estimate the
+foreground. Additionally, it estimates the true background by interpolating
+between pillars.
+
+The returned values should be centered around 0 for the centers of the pillars
+and around 1 for the foregound areas.
+
+```jldoctest; setup = :(using TiffImages, Pkg, FluorescenceExclusion; path = joinpath(Pkg.pkgdir(FluorescenceExclusion), "test", "testdata", "220125_lane2_fxmraw.tif"))
+julia> img = TiffImages.load(path);
+
+julia> fimg = float.(img); #convert to Gray{Float32}
+
+julia> correct!(fimg); # correct FxM channel
+```
+"""
+function correct!(data::A; mask=falses(size(data)...)) where {A <: AbstractMatrix{<: AbstractGray{<: AbstractFloat}}}
     pillar_mask, pillar_centers = identify(Pillars(), data)
     cell_mask = identify(Cells(), data, pillar_mask) .| mask
 
