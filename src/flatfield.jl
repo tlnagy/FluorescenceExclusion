@@ -26,9 +26,9 @@ function compute_flatfield(slice::AbstractArray{T, 2}, mask::AbstractArray{Bool,
     itp = ScatteredInterpolation.interpolate(Multiquadratic(), spoints, values);
 
     # evaluate the interpolant at every point
-    eval_points = hcat([[i, j] for i in 1:1024, j in 1:1024]...)
+    eval_points = hcat([[i, j] for i in 1:size(slice, 1), j in 1:size(slice, 2)]...)
 
-    flatfield = reshape(ScatteredInterpolation.evaluate(itp, eval_points), 1024, :)
+    flatfield = reshape(ScatteredInterpolation.evaluate(itp, eval_points), size(slice, 1), :)
 
     # make extra smooth
     imfilter!(flatfield, flatfield, Kernel.gaussian(30))
@@ -75,9 +75,8 @@ Gets the median intensity value for each pillar center defined by the boolean
 mask `centers` using the data in `img`. This can be used to determine the true
 "floor" in the intensity signal, which may drift over the course of an experiment.
 """
-function get_medians(img::AbstractArray{T, 2}, centers::AbstractArray{Bool, 2}) where {T}
+function get_medians(img::A, pillar_labels::AbstractMatrix{<: Integer}) where {A <: AbstractMatrix}
     pillar_medians = Dict{Int, Float64}()
-    pillar_labels = label_components(copy(centers))
 
     for i in unique(pillar_labels)
         (i == 0) && continue # ignore the background
@@ -87,6 +86,7 @@ function get_medians(img::AbstractArray{T, 2}, centers::AbstractArray{Bool, 2}) 
     pillar_medians
 end
 
+get_medians(img::A, pillar_centers::AbstractMatrix{Bool}) where {A <: AbstractMatrix} = get_medians(img, label_components(copy(pillar_centers)))
 
 function get_medians(img::AbstractArray{T, 3}, centers::AbstractArray{Bool, 3}; verbose=true) where {T}
     pillar_medians = DefaultDict{Int, Vector{Float64}}(Vector{Float64})
@@ -100,4 +100,30 @@ function get_medians(img::AbstractArray{T, 3}, centers::AbstractArray{Bool, 3}; 
         end
     end
     pillar_medians
+end
+
+"""
+    darkfield(img, pillar_centers)
+
+Compute the "darkfield" of an image by interpolating "true" minimum signal from
+the pillars to all points in the field. This accounts for subtle warping in the
+FxM chip.
+
+!!! note
+    This isn't a classic camera darkfield, but instead what the field would look
+    like if it were all pillar
+"""
+function darkfield(img, pillar_centers)
+    pillars_labeled = label_components(pillar_centers)
+    pillar_centroids = component_centroids(pillars_labeled)[2:end]
+    pillar_medians = get_medians(img, pillars_labeled)
+
+    pillar_pts = hcat(first.(pillar_centroids), last.(pillar_centroids))'
+    pillar_signals = [pillar_medians[i] for i in 1:length(pillar_medians)]
+
+    itp = ScatteredInterpolation.interpolate(Shepard(), pillar_pts, pillar_signals)
+
+    eval_points = hcat([[i, j] for i in 1:size(img, 1), j in 1:size(img, 2)]...)
+
+    return Gray.(reshape(ScatteredInterpolation.evaluate(itp, eval_points), size(img, 1), :))
 end

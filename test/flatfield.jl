@@ -1,6 +1,8 @@
 using Distributions
 using ImageContrastAdjustment
 using ImageMorphology
+using FluorescenceExclusion: identify, Pillars, get_medians
+using ColorTypes
 
 @testset "Flatfield Correction" begin
 
@@ -37,7 +39,7 @@ end
     img[6:9, 6, 1:3] .= [3.0, 4.0, 8.0, 9.0]
     centers = img .> 0.0
 
-    vals = FluorescenceExclusion.get_medians(img, centers; verbose=false)
+    vals = get_medians(img, centers; verbose=false)
 
     @test vals[1] == [2.0, 6.0, 6.0]
     @test vals[2] == [2.5]
@@ -45,9 +47,27 @@ end
 
     centers = repeat(img[:, :, 1] .> 0, 1, 1, 3)
 
-    vals = FluorescenceExclusion.get_medians(img, centers; verbose=false)
+    vals = get_medians(img, centers; verbose=false)
 
     @test vals[1] == [2.0, 0.0, 0.0]
     @test vals[2] == [2.5, 0.0, 0.0]
     @test vals[3] == [6.0, 6.0, 6.0]
+end
+
+@testset "Darkfield correction" begin
+    pillar_centers = Gray.(falses(512, 256))
+    pillar_centers[128 .+ (-5:5), 128 .+ (-5:5)] .= true
+    pillar_centers[384 .+ (-5:5), 128 .+ (-5:5)] .= true
+
+    img = zeros(Gray{Float32}, size(pillar_centers)...)
+    img[1:256, 1:256] .= Gray(1.0)
+
+    bkg = FluorescenceExclusion.darkfield(img, pillar_centers)
+
+    # make sure the pillars are correct
+    @test bkg[128, 128] == Gray(1.0)
+    @test bkg[384, 128] == Gray(0.0)
+
+    # test that halfway between the two "pillars" it's exactly half of the signal
+    @test bkg[256, 128] ≈ Gray(0.5)
 end
