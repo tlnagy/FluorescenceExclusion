@@ -94,4 +94,17 @@ end
     imgr[50, 1:50] .= false
 
     @test !isencapsulated(findall(imgr)) # make sure we aren't encapsulated
+
+    # if there are <3 points in the locality than the convex hull calculation
+    # fails, lets make sure we handle this properly
+    img .= false
+    @test !isencapsulated(findall(imgr))
+
+
+    draw!(img, Ellipse(CirclePointRadius(90, 10, 2)))
+    draw!(img, Ellipse(CirclePointRadius(50, 80, 1)))
+
+    # handle cases where the area of the convex hull is negative (i.e.
+    # counterclockwise) 
+    @test !isencapsulated(findall(imgr))
 end

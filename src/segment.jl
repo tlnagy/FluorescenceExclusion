@@ -213,6 +213,7 @@ is. We put an upper bound on the size of the cell "hole" by computing the
 area of the convex hull of the locality.
 """
 function isencapsulated(locality::Vector{CartesianIndex{2}})
+    (length(locality) == 0) && return false
     origin = minimum(locality)
     sz = Tuple(maximum(locality) - origin + CartesianIndex(1,1))
     tmp = falses(sz)
@@ -221,10 +222,12 @@ function isencapsulated(locality::Vector{CartesianIndex{2}})
     # compute the convex hull, slightly dilated to handle edge cases with
     # extremely thin localities where the area of the convex hull is very close
     # to the area of the hole
-    hullc = convexhull(dilate(tmp))
+    hulltmp = dilate(tmp)
+    (sum(hulltmp) < 3) && return false
+    hullc = convexhull(hulltmp)
     # area contained within the convex hull, we need this to set the 
     # maximum size of the flood fill algorithm
-    hullarea = PolygonOps.area(hullc)
+    hullarea = max(abs(PolygonOps.area(hullc)), 1)
 
     # to make sure that the outer region is larger than the area inside
     # convex hull, we pad the locality with that much area
