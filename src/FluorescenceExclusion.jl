@@ -7,6 +7,7 @@ using Images
 using ImageBinarization
 using Measurements
 using OffsetArrays
+using PolygonOps
 using ProgressMeter
 using ScatteredInterpolation
 using Statistics

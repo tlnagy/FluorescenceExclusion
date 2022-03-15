@@ -198,3 +198,43 @@ function segment!(img::AbstractArray{T, 2}, label::AbstractArray{Int, 2}) where 
     segments = ImageSegmentation.watershed(img, seeds; mask=.~ bkg, compactness=0.01)
     label .= labels_map(segments)
 end
+
+
+"""
+    isencapsulated(locality) -> Bool
+
+Given a list of the indices defining the locality of a cell, this algorithm
+computes whether the locality fully encapsulates the cell, i.e. there are
+no gaps around the cell. This usually happens when the cell is very close to
+another cell, a pillar, or the edge of the FOV.
+
+The basic approach is to flood fill the hole in the locality where the cell
+is. We put an upper bound on the size of the cell "hole" by computing the
+area of the convex hull of the locality.
+"""
+function isencapsulated(locality::Vector{CartesianIndex{2}})
+    origin = minimum(locality)
+    sz = Tuple(maximum(locality) - origin + CartesianIndex(1,1))
+    tmp = falses(sz)
+    tmp[locality .- Ref(origin) .+ Ref(CartesianIndex(1,1))] .= true
+
+    # compute the convex hull, slightly dilated to handle edge cases with
+    # extremely thin localities where the area of the convex hull is very close
+    # to the area of the hole
+    hullc = convexhull(dilate(tmp))
+    # area contained within the convex hull, we need this to set the 
+    # maximum size of the flood fill algorithm
+    hullarea = PolygonOps.area(hullc)
+
+    # to make sure that the outer region is larger than the area inside
+    # convex hull, we pad the locality with that much area
+    pad = ceil(Int, sqrt(hullarea) / 2)
+
+    tmp2 = trues(size(tmp) .+ pad * 2)
+    tmp2[findall(tmp) .+ Ref(CartesianIndex(pad, pad))] .= false
+    
+    # flood fill any regions that are up to the area of the convex hull of
+    # the locality and then check if anything has changed. If it has, that
+    # means the locality fully encapsulated the cell.
+    any(imfill(tmp2, 1:hullarea) .⊻ tmp2)
+end

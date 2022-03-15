@@ -1,3 +1,5 @@
+using ImageDraw
+using FluorescenceExclusion: isencapsulated
 
 @testset "Segmenting pillars" begin
     img = ones(30,40, 2)
@@ -54,4 +56,42 @@ end
         end
     end
 
+end
+
+@testset "Encapsulation" begin
+    img = Gray.(falses(100, 100))
+
+    # first draw two circles so that we have a hole (a cell) that is fully
+    # encapsulated by the true signal (aka the locality)
+    draw!(img, Ellipse(CirclePointRadius(50, 50, 40)))
+    draw!(img, Ellipse(CirclePointRadius(50, 50, 20)), Gray.(false))
+
+    imgr = reinterpret(Bool, img)
+
+    # should be encapsulated
+    @test isencapsulated(findall(imgr))
+
+    # Let's add a thin connector to connect the "hole" with the outside so that
+    # it is no longer encapsulated
+    imgr[50, 1:50] .= false
+
+    @test !isencapsulated(findall(imgr)) # make sure we aren't encapsulated
+
+    img .= false
+
+    # Now, let's test a locality with a thickness of a single pixel, the
+    # calculation of the convex hull can have a couple pixel error so this makes
+    # sure it can handle thin regions
+    draw!(img, Ellipse(CirclePointRadius(50, 50, 40)))
+    draw!(img, Ellipse(CirclePointRadius(50, 50, 39)), Gray.(false))
+
+    imgr = reinterpret(Bool, img)
+
+    @test isencapsulated(findall(imgr))
+
+    # Let's add a thin connector to connect the "hole" with the outside so that
+    # it is no longer encapsulated
+    imgr[50, 1:50] .= false
+
+    @test !isencapsulated(findall(imgr)) # make sure we aren't encapsulated
 end
