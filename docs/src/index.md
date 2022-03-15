@@ -42,4 +42,5 @@ FluorescenceExclusion.darkfield
 FluorescenceExclusion.generate_sample_grid
 FluorescenceExclusion.get_locality
 FluorescenceExclusion.get_medians
+FluorescenceExclusion.isencapsulated
 ```

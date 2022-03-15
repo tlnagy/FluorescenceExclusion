@@ -1,7 +1,7 @@
 name = "FluorescenceExclusion"
 uuid = "b1480678-572a-4d60-ab1d-db2f300f29c9"
 authors = ["Tamas Nagy <github@tamasnagy.com>"]
-version = "0.2.3"
+version = "0.2.4"
 
 [deps]
 AxisArrays = "39de3d68-74b9-583c-8d2d-e117c070f3a9"
@@ -14,6 +14,7 @@ Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
 OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
 Pandas = "eadc2687-ae89-51f9-a5d9-86b5a6373a9c"
+PolygonOps = "647866c9-e3ac-4575-94e7-e3d426903924"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 ScatteredInterpolation = "3f865c0f-6dca-5f4d-999b-29fe1e7e3c92"

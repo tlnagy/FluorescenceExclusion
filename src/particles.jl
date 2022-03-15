@@ -46,7 +46,8 @@ function build_tp_df(img::AxisArray{T1, 4},
                            :id=>ids,
                            :area=>lengths[2:end],
                            :footprint=>map(x->CartesianIndex.(x), (component_subscripts(component_slice)[ids .+ 1])),
-                           :locality=>collect(values(localities)))
+                           :locality=>collect(values(localities)),
+                           :isencapsulated=>isencapsulated.(values(localities)))
 
         cax = AxisArrays.axes(img, Axis{:channel})
         for c in cax
