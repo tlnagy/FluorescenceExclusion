@@ -21,7 +21,7 @@ img = TiffImages.load(path) # load a FxM image
 
 fimg = float.(img) # convert to floating point
 
-correct!(fimg)
+correct!(fimg, fimg)
 
 hcat(img, fimg)
 ```

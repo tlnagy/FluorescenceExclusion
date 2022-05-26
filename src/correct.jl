@@ -35,20 +35,22 @@ julia> img = TiffImages.load(path);
 
 julia> fimg = float.(img); #convert to Gray{Float32}
 
-julia> correct!(fimg); # correct FxM channel
+julia> correct!(fimg, fimg); # correct FxM channel, we don't have a denoise image so we re-use the same one
 ```
 """
-function correct!(data::A; mask=falses(size(data)...)) where {A <: AbstractMatrix{<: AbstractGray{<: AbstractFloat}}}
-    pillar_mask, pillar_centers = identify(Pillars(), data)
-    cell_mask = identify(Cells(), data, pillar_mask) .| mask
+function correct!(data::A, dn_img) where {A <: AbstractMatrix{<: AbstractGray{<: AbstractFloat}}}
+    pillar_mask, pillar_centers = identify(Pillars(), dn_img)
+    cell_mask = identify(Cells(), dn_img, pillar_mask)
 
     bkg = darkfield(data, pillar_centers)
 
-    flatfield = compute_flatfield(data, cell_mask .| pillar_mask, len=20) .- bkg;
+    data .-= bkg
+
+    flatfield = compute_flatfield(data, cell_mask .| pillar_mask, len=30);
 
     labeled = label_components(cell_mask)
 
-    data .= @. clamp((data - bkg) / flatfield, Gray(-0.05), Gray(1.05))
+    data .= @. clamp(data / flatfield, Gray(-0.1), Gray(1.1))
 
     labeled
 end
