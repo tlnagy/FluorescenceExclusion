@@ -1,4 +1,5 @@
 using ImageDraw
+using FixedPointNumbers
 using FluorescenceExclusion: isencapsulated
 
 @testset "Segmenting pillars" begin
@@ -58,6 +59,30 @@ end
 
 end
 
+@testset "Segment locality" begin
+    labels = Gray.(zeros(UInt8, 100, 200))
+
+    # draw two cells
+    draw!(labels, Ellipse(CirclePointRadius(50, 50, 20)), Gray(reinterpret(N0f8, UInt8(1))))
+    draw!(labels, Ellipse(CirclePointRadius(120, 50, 20)), Gray(reinterpret(N0f8, UInt8(2))))
+
+    # draw pillar
+    pillar_mask = Gray.(falses(size(labels)))
+    draw!(pillar_mask, Ellipse(CirclePointRadius(200, 50, 50)))
+
+    localities = identify(FluorescenceExclusion.Locality(), Int.(reinterpret(UInt8, labels)), Bool.(pillar_mask))
+    @test length(localities[1]) == 1244
+    @test length(localities[2]) == 681 # cell 2 is close to the pillar and thus its locality is smaller
+
+    # if we change it so there's no padding then the two localities should be same
+    localities = identify(FluorescenceExclusion.Locality(), Int.(reinterpret(UInt8, labels)), Bool.(pillar_mask), min_pillar_dist = 0)
+    @test length(localities[1]) == length(localities[2])
+
+    # test that the function complains if a label is missing
+    draw!(labels, Ellipse(CirclePointRadius(120, 50, 20)), Gray(reinterpret(N0f8, UInt8(4))))    
+    @test_logs (:warn, "Do not remove values from `labels`, only from `ids`. Calc might be wrong!") identify(FluorescenceExclusion.Locality(), Int.(reinterpret(UInt8, labels)), Bool.(pillar_mask))
+end
+
 @testset "Encapsulation" begin
     img = Gray.(falses(100, 100))
 
@@ -98,6 +123,8 @@ end
     # if there are <3 points in the locality than the convex hull calculation
     # fails, lets make sure we handle this properly
     img .= false
+    img[10, 10] = true
+    img[10, 20] = true
     @test !isencapsulated(findall(imgr))
 
 

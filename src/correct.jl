@@ -35,7 +35,7 @@ julia> img = TiffImages.load(path);
 
 julia> fimg = float.(img); #convert to Gray{Float32}
 
-julia> correct!(fimg); # correct FxM channel
+julia> correct!(fimg, fimg); # correct FxM channel, we don't have a denoise image so we re-use the same one
 ```
 """
 function correct!(data::A, dn_img) where {A <: AbstractMatrix{<: AbstractGray{<: AbstractFloat}}}

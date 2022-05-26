@@ -122,14 +122,16 @@ function get_locality(foreground::AbstractArray{Bool, 2}, cellmask::AbstractArra
 end
 
 """
-    identify(Locality(), labels, ids; dist) -> Dict
+    identify(Locality(), labels, pillar_masks; min_pillar_dist, dist) -> Dict
 
-Gets the local background areas given the output of `label_components` and a
-list of objects whose areas should be found defined by `ids`. The local
+Gets the local background areas given the output of `label_components`. The local
 background is defined as a ring around the object that is at
 minimum `mindist` away from every object (in pixels) and a maximum of `maxdist`
-away from the target object. The result is a dictionary mapping the object id to
-all indices in its local background.
+away from the target object. Pillars, as defined by true values in
+`pillar_masks`, are ignored as are areas that are `min_pillar_dist` away from a
+pillar. The result is a dictionary mapping the object id to all indices in its
+local background. 
+
 !!! warning
     It's really important that `labels` has all foreground objects labeled
     because otherwise they might inadvertently be included in an object's
@@ -152,8 +154,8 @@ function identify(::Locality,
 
     pillar_area = distance_transform(feature_transform((pillar_masks))) .<= min_pillar_dist
     nx, ny = size(labels)
-    pillar_area[1:ny, [1, 2, ny-1, ny]] .= true
-    pillar_area[[1, 2, nx-1, nx], 1:nx] .= true
+    pillar_area[1:nx, [1, 2, ny-1, ny]] .= true
+    pillar_area[[1, 2, nx-1, nx], 1:ny] .= true
 
     nx, ny = size(labels)
     localities = OrderedDict{Int, Vector{CartesianIndex{2}}}()
@@ -233,7 +235,7 @@ function isencapsulated(locality::Vector{CartesianIndex{2}})
     # extremely thin localities where the area of the convex hull is very close
     # to the area of the hole
     hulltmp = dilate(tmp)
-    (count(hulltmp) <= 3) && return false
+    (count(tmp) <= 3) && return false
     hullc = convexhull(hulltmp)
     # area contained within the convex hull, we need this to set the 
     # maximum size of the flood fill algorithm
@@ -249,5 +251,5 @@ function isencapsulated(locality::Vector{CartesianIndex{2}})
     # flood fill any regions that are up to the area of the convex hull of
     # the locality and then check if anything has changed. If it has, that
     # means the locality fully encapsulated the cell.
-    any(imfill(tmp2, 1:hullarea) .⊻ tmp2)
+    any(imfill(tmp2, (1, hullarea)) .⊻ tmp2)
 end
