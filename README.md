@@ -17,11 +17,19 @@ http://www.sciencedirect.com/science/article/pii/S0091679X16301613
 
 ## Installation
 
-Until this package is registered, the easiest way to install is running the
-following command in the Julia REPL:
+Until this package is registered in the General repository, the easiest way to install the latest stable version is 
+to add https://github.com/tlnagy/TNRegistry as follows:
 
 ```julia
-] dev https://github.com/tlnagy/FluorescenceExclusion.jl.git
+using Pkg
+pkg"registry add git@github.com:tlnagy/TNRegistry.git"
+```
+
+Then installation is as easy as
+
+```julia
+using Pkg
+Pkg.add("FluorescenceExclusion")
 ```
 
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
