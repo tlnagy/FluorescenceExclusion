@@ -62,14 +62,19 @@ thresholds using the distribution of spatial gradient sizes across cells.
 """
 function identify(::Cells,
                  img::AbstractArray{T, 2},
-                 pillar_masks::AbstractArray{Bool, 2}) where {T}
+                 pillar_masks::AbstractArray{Bool, 2};
+                 min_pixel = 50,
+                 min_pillar_dist = 30) where {T}
 
-    grad_y, grad_x = imgradients(img, KernelFactors.scharr);
+    grad_y, grad_x = imgradients(img, KernelFactors.scharr, "reflect");
     mag = hypot.(grad_x, grad_y)
 
     # remove the pillars and their vicinities from the calculations since they
     # can skew the results
-    foreground = distance_transform(feature_transform((pillar_masks))) .> 30
+    foreground = distance_transform(feature_transform((pillar_masks))) .> min_pillar_dist
+    nx, ny = size(img)
+    foreground[1:ny, [1, 2, ny-1, ny]] .= false
+    foreground[[1, 2, nx-1, nx], 1:nx] .= false
     mag .*= foreground
 
     flattened = filter(x->x > 0.0, reshape(mag, :))
@@ -82,7 +87,7 @@ function identify(::Cells,
     normfit = fit_mle(LogNormal, view(flattened, lo .< flattened .< hi))
 
     thres = opening(.~imfill(mag .< exp(normfit.μ + 1*normfit.σ), (0, 500)))
-    imfill(thres, (0, 50))
+    imfill(thres, (0, min_pixel))
 end
 
 function identify(::Cells,
@@ -131,14 +136,12 @@ all indices in its local background.
     locality.
 """
 function identify(::Locality, 
-                  labels::AbstractArray{Int, 2}, 
-                  ids::Vector{Int};
+                  labels::AbstractMatrix{Int}, 
+                  pillar_masks::AbstractMatrix{Bool};
+                  min_pillar_dist = 30,
                   dist=(2, 10))
 
     boxes = component_boxes(labels)
-    # boxes always contains the background label as well, while there's no guarantee
-    # that ids does as well
-    (!(0 in ids)) && deleteat!(boxes, 1)
 
     # if we detect gaps in the numbering it's probably because some labels were
     # removed, which can make our foreground detection incorrect
@@ -147,6 +150,11 @@ function identify(::Locality,
         @warn "Do not remove values from `labels`, only from `ids`. Calc might be wrong!"
     end
 
+    pillar_area = distance_transform(feature_transform((pillar_masks))) .<= min_pillar_dist
+    nx, ny = size(labels)
+    pillar_area[1:ny, [1, 2, ny-1, ny]] .= true
+    pillar_area[[1, 2, nx-1, nx], 1:nx] .= true
+
     nx, ny = size(labels)
     localities = OrderedDict{Int, Vector{CartesianIndex{2}}}()
 
@@ -154,9 +162,9 @@ function identify(::Locality,
 
     δ = dist[1] + dist[2]
 
-    for id in ids
+    for id in computed_ids
         # unpack bounding box
-        (minx, miny), (maxx, maxy) = boxes[id]
+        (minx, miny), (maxx, maxy) = boxes[id+1]
 
         # extend window around bounding box by the max distance
         xrange = max(minx-δ, 1):min(maxx+δ, nx)
@@ -164,9 +172,11 @@ function identify(::Locality,
 
         local_allobjects = view(allobjects, xrange, yrange)
         local_cellmask = view(labels, xrange, yrange) .== id
-        @assert sum(local_cellmask) > 0 "No object of $id found"
+        @assert sum(local_cellmask) > 0 "No object of id=$id found"
 
         locality = get_locality(local_allobjects, local_cellmask; dist=dist)
+        localpillar = view(pillar_area, xrange, yrange)
+        locality[localpillar] .= false
 
         # use offset arrays to return CartesianIndices in the original image coordinates
         localities[id] = findall(OffsetArray(locality, xrange, yrange))

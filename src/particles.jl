@@ -10,7 +10,8 @@ distance away in pixels from each cell to include in its local background
 calculation.
 """
 function build_tp_df(img::AxisArray{T1, 4},
-                     components::AxisArray{T2, 3}; dist=(2, 10)) where {T1, T2 <: Integer}
+                     components::AxisArray{T2, 3}; dist=(2, 10), 
+                     fxmchannel = :EPI_DeepRed, min_pillar_dist = 10) where {T1, T2 <: Integer}
 
     particles = DataFrames.DataFrame[]
 
@@ -38,7 +39,9 @@ function build_tp_df(img::AxisArray{T1, 4},
         # select the current time slice and enforce storage order to match
         # components
         slice = view(img, Axis{:y}(:), Axis{:x}(:), Axis{:channel}(:), Axis{:time}(timepoint))
-        localities = identify(Locality(), component_slice, ids, dist=dist)
+        pillars, _ = identify(Pillars(), view(slice, Axis{:channel}(fxmchannel)))
+        localities = identify(Locality(), component_slice, pillars;
+                              dist=dist, min_pillar_dist=min_pillar_dist)
         # dictionary of ids to areas
         data = OrderedDict(:x=>xs,
                            :y=>ys,
@@ -84,7 +87,8 @@ function build_tp_df(img::AxisArray{T1, 3},
     build_tp_df(AxisArray(reshape(img, size(img)..., 1),
                           AxisArrays.axes(img)..., Axis{:channel}([:FxM])),
                 thresholds;
-                dist=dist
+                dist=dist,
+                fxmchannel=:FxM
                )
 end
 
@@ -103,7 +107,8 @@ function build_tp_df(img::AxisArray{T1, 3},
     build_tp_df(AxisArray(reshape(img, size(img)..., 1),
                           AxisArrays.axes(img)..., Axis{:channel}([:FxM])),
                 thresholds;
-                dist=dist
+                dist=dist,
+                fxmchannel=:FxM
                )
 end
 
