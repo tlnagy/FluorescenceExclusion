@@ -223,7 +223,7 @@ function isencapsulated(locality::Vector{CartesianIndex{2}})
     # extremely thin localities where the area of the convex hull is very close
     # to the area of the hole
     hulltmp = dilate(tmp)
-    (sum(hulltmp) < 3) && return false
+    (count(hulltmp) <= 3) && return false
     hullc = convexhull(hulltmp)
     # area contained within the convex hull, we need this to set the 
     # maximum size of the flood fill algorithm
