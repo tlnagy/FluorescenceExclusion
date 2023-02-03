@@ -1,7 +1,7 @@
 name = "FluorescenceExclusion"
 uuid = "b1480678-572a-4d60-ab1d-db2f300f29c9"
 authors = ["Tamas Nagy <github@tamasnagy.com>"]
-version = "0.2.5"
+version = "0.2.6"
 
 [deps]
 AxisArrays = "39de3d68-74b9-583c-8d2d-e117c070f3a9"
@@ -27,7 +27,7 @@ AxisArrays = "0.4"
 ColorTypes = "0.10, 0.11"
 DataFrames = "0.20, 0.21, 1"
 DataStructures = "0.17, 0.18"
-Distributions = "0.22, 0.23, 0.24"
+Distributions = "0.22, 0.23, 0.24, 0.25"
 ImageBinarization = "0.2"
 Measurements = "2"
 OffsetArrays = "1"
